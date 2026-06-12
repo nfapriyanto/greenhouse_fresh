@@ -172,6 +172,9 @@ class OrderController extends Controller
                     'first_name' => $order->name,
                     'phone' => $order->phone,
                     'email' => Auth::user()->email ?? 'customer@greenhouse.com',
+                ],
+                'callbacks' => [
+                    'finish' => route('orders.mine'),
                 ]
             ]);
 
