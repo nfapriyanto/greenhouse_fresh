@@ -79,7 +79,7 @@
     background:#2563eb;
 }
 
-.status-packing{
+.status-ready_to_ship{
     background:#f59e0b;
 }
 
@@ -87,8 +87,12 @@
     background:#0ea5e9;
 }
 
-.status-delivered{
+.status-completed{
     background:#16a34a;
+}
+
+.status-cancelled{
+    background:#ef4444;
 }
 
 .tracking-box{
@@ -140,7 +144,9 @@
             <div>
 
                 <div class="order-id">
-                    Pesanan #{{ $order->id }}
+                    <a href="{{ route('orders.show', $order->id) }}" style="color:#166534; text-decoration:none;">
+                        Pesanan #{{ $order->id }} &rarr;
+                    </a>
                 </div>
 
                 <div class="order-date">
@@ -157,7 +163,7 @@
 
         </div>
 
-        <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
 
             <span class="badge status-{{ $order->status }}">
 
@@ -165,32 +171,13 @@
 
             </span>
 
-        </div>
-
-        <div class="tracking-box">
-
-            <div class="tracking-title">
-
-                Informasi Pengiriman
-
-            </div>
-
-            <p>
-                <b>Kurir:</b>
-                {{ $order->courier ?? '-' }}
-            </p>
-
-            <p>
-                <b>Nomor Resi:</b>
-            </p>
-
-            <div class="resi">
-
-                {{ $order->resi ?? 'Belum tersedia' }}
-
-            </div>
+            <a href="{{ route('orders.show', $order->id) }}" style="display: inline-block; padding: 8px 16px; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #16a34a, #22c55e); color: white; text-decoration: none; font-weight: bold; transition: .3s;">
+                Detail Pesanan
+            </a>
 
         </div>
+
+
 
     </div>
 

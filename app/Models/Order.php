@@ -18,6 +18,8 @@ class Order extends Model
         'total_price',
         'status',
         'bukti_transfer',
+        'snap_token',
+        'redirect_url',
     ];
 
     public function user()

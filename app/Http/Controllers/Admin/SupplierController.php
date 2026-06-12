@@ -14,9 +14,21 @@ class SupplierController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(Request $request)
     {
-        $suppliers = Supplier::latest()->get();
+        $search = $request->query('search');
+
+        $query = Supplier::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $suppliers = $query->latest()->get();
 
         return view(
             'admin.suppliers.index',

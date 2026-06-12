@@ -619,9 +619,14 @@
 
                                 <form
                                     action="{{ route('cart.add',$row['id']) }}"
-                                    method="GET"
+                                    method="POST"
                                 >
-
+                                    @csrf
+                                    <input
+                                        type="hidden"
+                                        name="override"
+                                        value="1"
+                                    >
                                     <input
                                         type="hidden"
                                         name="quantity"
@@ -646,9 +651,14 @@
 
                                 <form
                                     action="{{ route('cart.add',$row['id']) }}"
-                                    method="GET"
+                                    method="POST"
                                 >
-
+                                    @csrf
+                                    <input
+                                        type="hidden"
+                                        name="override"
+                                        value="1"
+                                    >
                                     <input
                                         type="hidden"
                                         name="quantity"

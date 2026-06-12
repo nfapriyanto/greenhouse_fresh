@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
@@ -81,16 +82,6 @@ class OrderController extends Controller
                 'max:30'
             ],
 
-            'shipping_method' => [
-                'required',
-                'in:instant,sameday,regular,pickup'
-            ],
-
-            'payment_method' => [
-                'required',
-                'in:transfer,qris,cod'
-            ],
-
         ]);
 
         /*
@@ -121,9 +112,9 @@ class OrderController extends Controller
 
             'phone' => $validated['phone'],
 
-            'shipping_method' => $validated['shipping_method'],
+            'shipping_method' => 'delivery',
 
-            'payment_method' => $validated['payment_method'],
+            'payment_method' => 'midtrans',
 
             'total_price' => $total,
 
@@ -158,43 +149,52 @@ class OrderController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | COD = TIDAK PERLU UPLOAD
+        | MIDTRANS INTEGRATION
         |--------------------------------------------------------------------------
         */
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+        $isProduction = filter_var(env('MIDTRANS_IS_PRODUCTION', false), FILTER_VALIDATE_BOOLEAN);
+        $baseUrl = $isProduction 
+            ? 'https://app.midtrans.com/snap/v1/transactions' 
+            : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
-        if ($validated['payment_method'] == 'cod') {
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->withBasicAuth($serverKey, '')
+            ->post($baseUrl, [
+                'transaction_details' => [
+                    'order_id' => 'ORDER-' . $order->id . '-' . time(),
+                    'gross_amount' => (int) $total,
+                ],
+                'customer_details' => [
+                    'first_name' => $order->name,
+                    'phone' => $order->phone,
+                    'email' => Auth::user()->email ?? 'customer@greenhouse.com',
+                ]
+            ]);
 
-            return redirect()
-                ->route('orders.mine')
-                ->with(
+            if ($response->successful()) {
+                $result = $response->json();
+                $order->update([
+                    'snap_token' => $result['token'],
+                    'redirect_url' => $result['redirect_url'],
+                ]);
 
-                    'success',
+                // Clear cart session
+                Session::forget('cart');
+                Session::forget('cart_count');
 
-                    'Pesanan COD berhasil dibuat.'
-
-                );
-
+                return redirect($result['redirect_url']);
+            } else {
+                \Log::error('Midtrans API Error: ' . $response->body());
+                return redirect()->route('orders.mine')->with('success', 'Pesanan #' . $order->id . ' berhasil dibuat (pembayaran pending).');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Midtrans Exception: ' . $e->getMessage());
+            return redirect()->route('orders.mine')->with('success', 'Pesanan #' . $order->id . ' berhasil dibuat (pembayaran pending).');
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRANSFER / QRIS
-        |--------------------------------------------------------------------------
-        */
-
-        return redirect()
-            ->route('payment.upload.form', [
-
-                'order_id' => $order->id
-
-            ])
-            ->with(
-
-                'success',
-
-                'Pesanan #' . $order->id . ' berhasil dibuat. Silakan upload bukti pembayaran.'
-
-            );
     }
 
     /*
@@ -203,11 +203,23 @@ class OrderController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::with('user')
-            ->latest()
-            ->get();
+        $search = $request->query('search');
+
+        $query = Order::with('user')->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', $search)
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $orders = $query->get();
 
         return view('admin.orders.index', compact('orders'));
     }
@@ -224,11 +236,9 @@ class OrderController extends Controller
 
             'pending',
 
-            'waiting_verification',
-
             'processing',
 
-            'packing',
+            'ready_to_ship',
 
             'shipped',
 
@@ -248,27 +258,10 @@ class OrderController extends Controller
 
             ],
 
-            'courier' => [
-                'nullable',
-                'string',
-                'max:255'
-            ],
-
-            'resi' => [
-                'nullable',
-                'string',
-                'max:255'
-            ],
-
         ]);
 
         $oldStatus = $order->status;
         $order->status = $validated['status'];
-
-        if ($validated['status'] === 'shipped') {
-            $order->courier = $validated['courier'] ?? $order->courier;
-            $order->resi = $validated['resi'] ?? $order->resi;
-        }
 
         $order->save();
 

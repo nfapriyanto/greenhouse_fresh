@@ -713,20 +713,11 @@
 
             </div>
 
-            <div class="stat-card">
+            <div class="stat-value">
 
-                <div class="stat-title">
-
-                    Total Produk
-
-                </div>
-
-                <div class="stat-value">
-
-                    12
+                {{ $stats['product_count'] }}
 
             </div>
-
 
         </div>
 
@@ -740,7 +731,7 @@
 
             <div class="stat-value">
 
-                0
+                {{ $stats['order_count'] }}
 
             </div>
 
@@ -750,13 +741,13 @@
 
             <div class="stat-title">
 
-                Pesanan Pending
+                Total Pelanggan
 
             </div>
 
             <div class="stat-value">
 
-                0
+                {{ $stats['customer_count'] }}
 
             </div>
 
@@ -766,13 +757,13 @@
 
             <div class="stat-title">
 
-                Pendapatan
+                Total Pendapatan (Penjualan)
 
             </div>
 
-            <div class="stat-value">
+            <div class="stat-value" style="font-size: 28px; line-height: 1.8;">
 
-                Rp 0
+                Rp {{ number_format($stats['revenue_sum'], 0, ',', '.') }}
 
             </div>
 
@@ -780,65 +771,128 @@
 
     </div>
 
-    <!-- REPORT -->
-
-    <div class="report-card">
-
-        <div class="report-title">
-
-            Quick Report Penjualan
-
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+        
+        <!-- LEFT COLUMN: Chart -->
+        <div>
+            <div style="background: white; border-radius: 28px; padding: 30px; box-shadow: var(--shadow); border: 1px solid #eef2f7; margin-bottom: 24px;">
+                <h3 style="font-size: 22px; color: #166534; margin-bottom: 20px; font-weight: 700;">Grafik Perkembangan Penjualan (7 Hari Terakhir)</h3>
+                <canvas id="salesChart" style="max-height: 350px; width: 100%;"></canvas>
+            </div>
+            
+            <!-- TOP 5 PRODUCTS -->
+            <div style="background: white; border-radius: 28px; padding: 28px; box-shadow: var(--shadow); border: 1px solid #eef2f7;">
+                <h3 style="font-size: 20px; color: #166534; margin-bottom: 18px; font-weight: 700;">🛒 Produk Terlaris (Top 5)</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th style="padding: 12px 16px; text-align: left; font-size: 13px; color: #475569;">Produk</th>
+                            <th style="padding: 12px 16px; text-align: center; font-size: 13px; color: #475569;">Total Terjual</th>
+                            <th style="padding: 12px 16px; text-align: right; font-size: 13px; color: #475569;">Harga Satuan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topProducts as $item)
+                        <tr>
+                            <td style="padding: 14px 16px; border-top: 1px solid #f1f5f9; font-weight: 600;">
+                                {{ $item->product->name ?? 'Produk dihapus' }}
+                            </td>
+                            <td style="padding: 14px 16px; border-top: 1px solid #f1f5f9; text-align: center; font-weight: bold; color: #16a34a;">
+                                {{ $item->total_sold }} item
+                            </td>
+                            <td style="padding: 14px 16px; border-top: 1px solid #f1f5f9; text-align: right; color: #475569;">
+                                Rp {{ number_format($item->product->price ?? 0, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">Belum ada penjualan.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="form-grid">
-
-            <div>
-
-                <label>
-                    Dari Tanggal
-                </label>
-
-                <input type="date">
-
+        <!-- RIGHT COLUMN: Low Stock -->
+        <div>
+            <div style="background: white; border-radius: 28px; padding: 28px; box-shadow: var(--shadow); border: 1px solid #eef2f7;">
+                <h3 style="font-size: 20px; color: #b91c1c; margin-bottom: 18px; font-weight: 700;">⚠️ Stok Menipis (&lt; 5)</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #fdf2f2;">
+                            <th style="padding: 12px 16px; text-align: left; font-size: 13px; color: #b91c1c;">Produk</th>
+                            <th style="padding: 12px 16px; text-align: right; font-size: 13px; color: #b91c1c;">Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($lowStockProducts as $product)
+                        <tr>
+                            <td style="padding: 14px 16px; border-top: 1px solid #f1f5f9; font-weight: 600;">
+                                {{ $product->name }}
+                            </td>
+                            <td style="padding: 14px 16px; border-top: 1px solid #f1f5f9; text-align: right; font-weight: bold; color: #ef4444;">
+                                {{ $product->stock }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="2" style="padding: 20px; text-align: center; color: #166534; font-weight: 600;">Semua produk memiliki stok aman! ✨</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-
-            <div>
-
-                <label>
-                    Sampai Tanggal
-                </label>
-
-                <input type="date">
-
-            </div>
-
-        </div>
-
-        <div class="btn-group">
-
-            <button class="btn btn-primary">
-
-                Lihat Laporan
-
-            </button>
-
-            <button class="btn btn-light">
-
-                Export Excel
-
-            </button>
-
-            <button class="btn btn-light">
-
-                Export PDF
-
-            </button>
-
         </div>
 
     </div>
 
 </div>
+
+<!-- CHART.JS INTEGRATION -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode($chartLabels) !!},
+            datasets: [{
+                label: 'Penjualan (Rp)',
+                data: {!! json_encode($chartValues) !!},
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#16a34a',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 
 </body>
 </html>

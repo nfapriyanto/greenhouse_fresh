@@ -542,11 +542,15 @@
         </div>
 
         <form
+            action="{{ route('admin.suppliers.index') }}"
+            method="GET"
             class="search-form"
         >
 
             <input
                 type="text"
+                name="search"
+                value="{{ request('search') }}"
                 class="search-input"
                 placeholder="Cari nama supplier..."
             >

@@ -882,20 +882,22 @@
 
         <!-- SEARCH -->
 
-        <div class="search-box">
+        <form action="{{ route('home') }}" method="GET" class="search-box">
 
             <input
                 type="text"
+                name="q"
+                value="{{ request('q') }}"
                 placeholder="Cari produk..."
             >
 
-            <button>
+            <button type="submit">
 
                 🔍
 
             </button>
 
-        </div>
+        </form>
 
         <!-- MENU -->
 

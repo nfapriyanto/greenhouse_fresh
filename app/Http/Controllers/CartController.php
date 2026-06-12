@@ -70,7 +70,15 @@ class CartController extends Controller
 
         if (isset($cart[$id])) {
 
-            $cart[$id]['quantity'] = $quantity;
+            if ($request->has('override')) {
+
+                $cart[$id]['quantity'] = $quantity;
+
+            } else {
+
+                $cart[$id]['quantity'] += $quantity;
+
+            }
 
         } else {
 

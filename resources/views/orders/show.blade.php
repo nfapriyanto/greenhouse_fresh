@@ -25,9 +25,8 @@
                 @php
                   $mapColor = [
                     'pending' => '#6b7280',
-                    'waiting_verification' => '#a16207',
                     'processing' => '#2563eb',
-                    'packing' => '#f59e0b',
+                    'ready_to_ship' => '#f59e0b',
                     'shipped' => '#0ea5e9',
                     'completed' => '#16a34a',
                     'cancelled' => '#ef4444',
@@ -38,6 +37,13 @@
                 <span style="display:inline-block; padding:6px 14px; border-radius:999px; color:#fff; background:{{ $color }}; font-weight:700; font-size:13px;">
                   {{ $label }}
                 </span>
+                @if($order->status == 'pending' && $order->redirect_url)
+                    <div style="margin-top: 14px;">
+                        <a href="{{ $order->redirect_url }}" target="_blank" style="display:inline-block; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg, #16a34a, #22c55e); color:white; font-weight:700; font-size:14px; text-decoration:none; box-shadow:0 6px 16px rgba(22,163,74,.18); transition:.3s;">
+                            💳 Bayar Sekarang (Midtrans)
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -49,27 +55,12 @@
                 <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">{{ $order->address }}</p>
             </div>
             <div>
-                <h4 style="margin: 0 0 8px; color: #166534; font-size: 16px;">Metode Pengiriman & Pembayaran</h4>
+                <h4 style="margin: 0 0 8px; color: #166534; font-size: 16px;">Metode Pembayaran</h4>
                 <p style="margin: 0 0 6px; color: #475569; font-size: 14px;">
-                    <strong>Pengiriman:</strong> {{ ucfirst($order->shipping_method) }}
-                </p>
-                <p style="margin: 0 0 6px; color: #475569; font-size: 14px;">
-                    <strong>Pembayaran:</strong> {{ strtoupper($order->payment_method) }}
+                    <strong>Pembayaran:</strong> {{ strtoupper(str_replace('_', ' ', $order->payment_method)) }}
                 </p>
             </div>
         </div>
-
-        @if($order->courier || $order->resi)
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 18px; padding: 16px; margin-top: 20px;">
-                <h4 style="margin: 0 0 8px; color: #166534; font-size: 15px;">Informasi Pengiriman</h4>
-                <p style="margin: 0 0 4px; color: #475569; font-size: 14px;">
-                    <strong>Kurir:</strong> {{ $order->courier ?? '-' }}
-                </p>
-                <p style="margin: 0; color: #475569; font-size: 14px;">
-                    <strong>Nomor Resi:</strong> <span style="font-family: monospace; font-weight: 700; color: #166534; font-size: 15px;">{{ $order->resi ?? 'Belum tersedia' }}</span>
-                </p>
-            </div>
-        @endif
     </div>
 
     <!-- ITEMS CARD -->

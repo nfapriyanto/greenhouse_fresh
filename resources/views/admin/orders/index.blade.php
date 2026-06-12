@@ -432,15 +432,6 @@
 
             </a>
 
-            <a
-                href="{{ route('admin.products.create') }}"
-                class="add-btn"
-            >
-
-                + Tambah Produk
-
-            </a>
-
         </div>
 
     </div>
@@ -486,11 +477,15 @@
         </div>
 
         <form
+            action="{{ route('admin.orders') }}"
+            method="GET"
             class="search-form"
         >
 
             <input
                 type="text"
+                name="search"
+                value="{{ request('search') }}"
                 class="search-input"
                 placeholder="Cari nama pelanggan / ID pesanan..."
             >
@@ -569,22 +564,14 @@
                     <td style="min-width: 200px;">
                         <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
                             @csrf
-                            @method('PUT')
-
-                            <select name="status" class="status-select" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: white; font-family: 'Poppins', sans-serif; font-size: 13px; outline: none;" onchange="toggleTrackingFields(this, {{ $order->id }})">
-                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Belum Dibayar (Pending)</option>
-                                <option value="waiting_verification" {{ $order->status == 'waiting_verification' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Diproses (Processing)</option>
-                                <option value="packing" {{ $order->status == 'packing' ? 'selected' : '' }}>Dikemas (Packing)</option>
-                                <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Dikirim (Shipped)</option>
-                                <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Selesai (Completed)</option>
-                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Dibatalkan (Cancelled)</option>
+                            @method('PUT')                             <select name="status" class="status-select" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: white; font-family: 'Poppins', sans-serif; font-size: 13px; outline: none;">
+                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>
+                                <option value="ready_to_ship" {{ $order->status == 'ready_to_ship' ? 'selected' : '' }}>Ready to Ship</option>
+                                <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                                <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                             </select>
-
-                            <div id="tracking-fields-{{ $order->id }}" style="display: {{ $order->status == 'shipped' ? 'flex' : 'none' }}; flex-direction: column; gap: 8px; margin-top: 8px;">
-                                <input type="text" name="courier" value="{{ $order->courier }}" placeholder="Nama Kurir (e.g. JNE)" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Poppins', sans-serif; font-size: 12px;" {{ $order->status == 'shipped' ? 'required' : '' }}>
-                                <input type="text" name="resi" value="{{ $order->resi }}" placeholder="Nomor Resi" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Poppins', sans-serif; font-size: 12px;" {{ $order->status == 'shipped' ? 'required' : '' }}>
-                            </div>
 
                             <button type="submit" class="btn" style="width: 100%; margin-top: 8px; padding: 8px 12px; background: #ecfdf5; color: #166534; border-radius: 8px; font-size: 12px; font-weight: 700;">
                                 Update Status
@@ -638,19 +625,7 @@
 
 </div>
 
-<script>
-function toggleTrackingFields(selectEl, orderId) {
-    const fieldsDiv = document.getElementById('tracking-fields-' + orderId);
-    const inputs = fieldsDiv.querySelectorAll('input');
-    if (selectEl.value === 'shipped') {
-        fieldsDiv.style.display = 'flex';
-        inputs.forEach(input => input.setAttribute('required', 'required'));
-    } else {
-        fieldsDiv.style.display = 'none';
-        inputs.forEach(input => input.removeAttribute('required'));
-    }
-}
-</script>
+
 
 </body>
 </html>

@@ -15,6 +15,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
+use App\Http\Controllers\MidtransController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,8 @@ use App\Http\Controllers\Admin\SupplierController;
 
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
+
+Route::post('/api/midtrans/notification', [MidtransController::class, 'notification']);
 
 /*
 |--------------------------------------------------------------------------

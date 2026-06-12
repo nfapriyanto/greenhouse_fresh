@@ -778,10 +778,10 @@
 
             <input
                 type="text"
-                name="search"
+                name="q"
                 class="search-input"
                 placeholder="Cari nama produk..."
-                value="{{ request('search') }}"
+                value="{{ request('q') }}"
             >
 
             <button
