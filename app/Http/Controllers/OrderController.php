@@ -57,6 +57,18 @@ class OrderController extends Controller
 
         }
 
+        // Check stock of all items in cart before checkout
+        foreach ($cart as $productId => $item) {
+            $product = Product::find($item['id'] ?? $productId);
+            if (!$product || $item['quantity'] > $product->stock) {
+                $name = $product ? $product->name : 'Produk';
+                $available = $product ? $product->stock : 0;
+                return redirect()
+                    ->route('cart.index')
+                    ->with('error', "Stok produk '{$name}' tidak mencukupi untuk pesanan Anda. Tersedia: {$available}.");
+            }
+        }
+
         /*
         |--------------------------------------------------------------------------
         | VALIDATION

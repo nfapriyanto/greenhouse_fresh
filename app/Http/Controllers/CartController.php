@@ -64,6 +64,30 @@ class CartController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | STOCK CHECK
+        |--------------------------------------------------------------------------
+        */
+
+        $currentQty = 0;
+
+        if (isset($cart[$id])) {
+
+            $currentQty = $cart[$id]['quantity'];
+
+        }
+
+        $newQty = $request->has('override') ? $quantity : ($currentQty + $quantity);
+
+        if ($newQty > $product->stock) {
+
+            return redirect()
+                ->back()
+                ->with('error', "Stok tidak mencukupi! Hanya tersedia {$product->stock} unit untuk {$product->name}.");
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | UPDATE CART
         |--------------------------------------------------------------------------
         */

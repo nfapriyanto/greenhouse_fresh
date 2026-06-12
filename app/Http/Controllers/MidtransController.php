@@ -20,6 +20,20 @@ class MidtransController extends Controller
             return response()->json(['message' => 'Invalid order ID'], 400);
         }
 
+        // Validate Signature Key for security
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+        $statusCode = $payload['status_code'] ?? '';
+        $grossAmount = $payload['gross_amount'] ?? '';
+        $expectedSignature = hash("sha512", $orderIdPayload . $statusCode . $grossAmount . $serverKey);
+
+        if (($payload['signature_key'] ?? '') !== $expectedSignature) {
+            Log::warning('Midtrans Signature Key Mismatch!', [
+                'received' => $payload['signature_key'] ?? null,
+                'expected' => $expectedSignature
+            ]);
+            return response()->json(['message' => 'Invalid signature key'], 403);
+        }
+
         // Parse order_id from format 'ORDER-{id}-{timestamp}'
         $parts = explode('-', $orderIdPayload);
         $orderId = $parts[1] ?? null;
