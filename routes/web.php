@@ -327,6 +327,10 @@ Route::prefix('admin')
         Route::get('/orders', [OrderController::class, 'orders'])
             ->name('orders');
 
+        Route::get('/orders/{order}', [OrderController::class, 'adminShow'])
+            ->whereNumber('order')
+            ->name('orders.show');
+
         Route::put('/orders/{order}', [OrderController::class, 'update'])
             ->whereNumber('order')
             ->name('orders.update');

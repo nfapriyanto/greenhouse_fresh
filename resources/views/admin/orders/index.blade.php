@@ -593,7 +593,7 @@
                     </td>
 
                     <td>
-                        <a href="{{ route('orders.show', $order->id) }}" target="_blank" style="color: #16a34a; font-weight: 700; font-size: 14px; text-decoration: underline;">
+                        <a href="{{ route('admin.orders.show', $order->id) }}" style="color: #16a34a; font-weight: 700; font-size: 14px; text-decoration: underline;">
                             Detail
                         </a>
                     </td>

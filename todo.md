@@ -39,3 +39,4 @@ Symfony\Component\Routing\Exception\RouteNotFoundException
 Route [admin.suppliers.edit] not defined.
 """
 buat agar supplier ini isinya dapat melihat si supplier itu menyuplai product apa dari table products, nah 1 suplier ini bisa menyuplai banyak product.
+24. [X] Perbaiki bug pada route 'admin/orders' role admin ingin melihat detail pesanan tetapi malah mengalihkan ke route 'orders/5' yang dimana ini sisi client jadi jika user (si admin) ini tidak login sebagai customer maka di arahkan ke login.

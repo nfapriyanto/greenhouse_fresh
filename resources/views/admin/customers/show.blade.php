@@ -373,7 +373,7 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ route('orders.show', $order->id) }}" target="_blank" class="action-link">
+                        <a href="{{ route('admin.orders.show', $order->id) }}" class="action-link">
                             Detail →
                         </a>
                     </td>
