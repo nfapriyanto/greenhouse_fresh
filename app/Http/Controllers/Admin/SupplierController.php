@@ -90,4 +90,93 @@ class SupplierController extends Controller
                 'Supplier berhasil ditambahkan.'
             );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT SUPPLIER
+    |--------------------------------------------------------------------------
+    */
+
+    public function edit($id)
+    {
+        $supplier = Supplier::with('products')->findOrFail($id);
+        $allProducts = \App\Models\Product::with('supplier')->orderBy('name')->get();
+
+        return view('admin.suppliers.edit', compact('supplier', 'allProducts'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE SUPPLIER
+    |--------------------------------------------------------------------------
+    */
+
+    public function update(Request $request, $id)
+    {
+        $supplier = Supplier::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30'
+            ],
+            'address' => [
+                'nullable',
+                'string'
+            ],
+            'email' => [
+                'nullable',
+                'email'
+            ],
+            'products' => [
+                'nullable',
+                'array'
+            ],
+            'products.*' => [
+                'integer',
+                'exists:products,id'
+            ]
+        ]);
+
+        $supplier->update([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'address' => $validated['address'],
+            'email' => $validated['email'],
+        ]);
+
+        // Detach products currently belonging to this supplier
+        \App\Models\Product::where('supplier_id', $supplier->id)->update(['supplier_id' => null]);
+
+        // Attach selected products to this supplier
+        if ($request->has('products')) {
+            \App\Models\Product::whereIn('id', $request->input('products'))->update(['supplier_id' => $supplier->id]);
+        }
+
+        return redirect()
+            ->route('admin.suppliers.index')
+            ->with('success', 'Supplier berhasil diperbarui.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY SUPPLIER
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy($id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        $supplier->delete();
+
+        return redirect()
+            ->route('admin.suppliers.index')
+            ->with('success', 'Supplier berhasil dihapus.');
+    }
 }

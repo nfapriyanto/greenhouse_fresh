@@ -33,3 +33,9 @@ MIDTRANS_SERVER_KEY=Mid-server-**********
 20. [X] Pada route 'admin/orders' tambahkan filter pesanan dari statusnya.
 21. [X] Pada route 'admin/dashboard' ada statistik yang menampilkan Total Pelanggan bisakah itu nanti di klik dan menampilkan daftar pelanggan dan bisa melihat history pembelian dari pelanggan itu?
 22. [X] Pada route 'orders' tambahkan fitur untuk edit pesanana dengan kondisi status pesanan masih "Pending" atau belum dibayar. dan ratakan button dengan Detail Pesanan, Batalkan Pesanan.
+23. [X] Pada route 'admin/suppliers' terdapat error berikut:
+"""
+Symfony\Component\Routing\Exception\RouteNotFoundException
+Route [admin.suppliers.edit] not defined.
+"""
+buat agar supplier ini isinya dapat melihat si supplier itu menyuplai product apa dari table products, nah 1 suplier ini bisa menyuplai banyak product.

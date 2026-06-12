@@ -304,6 +304,18 @@ Route::prefix('admin')
 
             Route::post('/', [SupplierController::class, 'store'])
                 ->name('store');
+
+            Route::get('/{id}/edit', [SupplierController::class, 'edit'])
+                ->whereNumber('id')
+                ->name('edit');
+
+            Route::put('/{id}', [SupplierController::class, 'update'])
+                ->whereNumber('id')
+                ->name('update');
+
+            Route::delete('/{id}', [SupplierController::class, 'destroy'])
+                ->whereNumber('id')
+                ->name('destroy');
         });
 
         /*
