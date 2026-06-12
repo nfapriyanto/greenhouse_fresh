@@ -94,4 +94,43 @@ class AdminController extends Controller
 
         return back()->with('success', 'Produk dihapus.');
     }
+
+    public function customers(Request $request)
+    {
+        $q = $request->query('q');
+        $query = \App\Models\User::query();
+
+        if ($q) {
+            $query->where(function($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('email', 'like', "%{$q}%");
+            });
+        }
+
+        $customers = $query->withCount('orders')
+            ->withSum(['orders as total_spent' => function($query) {
+                $query->where('status', '!=', 'cancelled');
+            }], 'total_price')
+            ->orderByDesc('id')
+            ->paginate(20)
+            ->appends(['q' => $q]);
+
+        return view('admin.customers.index', compact('customers', 'q'));
+    }
+
+    public function customerShow($id)
+    {
+        $customer = \App\Models\User::withCount('orders')
+            ->withSum(['orders as total_spent' => function($query) {
+                $query->where('status', '!=', 'cancelled');
+            }], 'total_price')
+            ->findOrFail($id);
+
+        $orders = $customer->orders()
+            ->with('items.product')
+            ->orderByDesc('id')
+            ->paginate(15);
+
+        return view('admin.customers.show', compact('customer', 'orders'));
+    }
 }

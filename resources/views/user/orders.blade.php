@@ -145,7 +145,7 @@
 
                 <div class="order-id">
                     <a href="{{ route('orders.show', $order->id) }}" style="color:#166534; text-decoration:none;">
-                        Pesanan #{{ $order->id }} &rarr;
+                        Pesanan #{{ $order->id }}
                     </a>
                 </div>
 
@@ -165,15 +165,30 @@
 
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
 
-            <span class="badge status-{{ $order->status }}">
+            <div>
+                <span class="badge status-{{ $order->status }}">
+                    {{ ucfirst($order->status) }}
+                </span>
+            </div>
 
-                {{ ucfirst($order->status) }}
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="{{ route('orders.show', $order->id) }}" style="display: inline-block; padding: 8px 16px; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #16a34a, #22c55e); color: white; text-decoration: none; font-weight: bold; transition: .3s;">
+                    Detail Pesanan
+                </a>
 
-            </span>
+                @if($order->status == 'pending')
+                    <a href="{{ route('orders.edit', $order->id) }}" style="display: inline-block; padding: 8px 16px; font-size: 14px; border-radius: 10px; background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; text-decoration: none; font-weight: bold; transition: .3s;">
+                        Edit Pesanan
+                    </a>
 
-            <a href="{{ route('orders.show', $order->id) }}" style="display: inline-block; padding: 8px 16px; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #16a34a, #22c55e); color: white; text-decoration: none; font-weight: bold; transition: .3s;">
-                Detail Pesanan
-            </a>
+                    <form action="{{ route('orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')" style="margin: 0;">
+                        @csrf
+                        <button type="submit" style="display: inline-block; padding: 8px 16px; font-size: 14px; border-radius: 10px; background: #fee2e2; color: #dc2626; border: none; font-weight: bold; cursor: pointer; transition: .3s;">
+                            Batalkan Pesanan
+                        </button>
+                    </form>
+                @endif
+            </div>
 
         </div>
 

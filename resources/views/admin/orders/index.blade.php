@@ -476,10 +476,11 @@
 
         </div>
 
-        <form
+         <form
             action="{{ route('admin.orders') }}"
             method="GET"
             class="search-form"
+            style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;"
         >
 
             <input
@@ -488,11 +489,23 @@
                 value="{{ request('search') }}"
                 class="search-input"
                 placeholder="Cari nama pelanggan / ID pesanan..."
+                style="flex: 1;"
             >
+
+            <select name="status" class="search-input" style="flex: 0 0 200px; min-width: 150px; background: white; padding: 0 14px;" onchange="this.form.submit()">
+                <option value="">Semua Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing</option>
+                <option value="ready_to_ship" {{ request('status') == 'ready_to_ship' ? 'selected' : '' }}>Ready to Ship</option>
+                <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+            </select>
 
             <button
                 type="submit"
                 class="search-btn"
+                style="height: 56px;"
             >
 
                 Cari

@@ -37,11 +37,22 @@
                 <span style="display:inline-block; padding:6px 14px; border-radius:999px; color:#fff; background:{{ $color }}; font-weight:700; font-size:13px;">
                   {{ $label }}
                 </span>
-                @if($order->status == 'pending' && $order->redirect_url)
-                    <div style="margin-top: 14px;">
-                        <a href="{{ $order->redirect_url }}" target="_blank" style="display:inline-block; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg, #16a34a, #22c55e); color:white; font-weight:700; font-size:14px; text-decoration:none; box-shadow:0 6px 16px rgba(22,163,74,.18); transition:.3s;">
-                            💳 Bayar Sekarang (Midtrans)
+                @if($order->status == 'pending')
+                    <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        @if($order->redirect_url)
+                            <a href="{{ $order->redirect_url }}" target="_blank" style="display:inline-block; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg, #16a34a, #22c55e); color:white; font-weight:700; font-size:14px; text-decoration:none; box-shadow:0 6px 16px rgba(22,163,74,.18); transition:.3s;">
+                                💳 Bayar Sekarang (Midtrans)
+                            </a>
+                        @endif
+                        <a href="{{ route('orders.edit', $order->id) }}" style="display:inline-block; padding:10px 20px; border-radius:12px; background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; font-weight:700; font-size:14px; text-decoration:none; transition:.3s;">
+                            Edit Pesanan
                         </a>
+                        <form action="{{ route('orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')">
+                            @csrf
+                            <button type="submit" style="display:inline-block; padding:10px 20px; border-radius:12px; background:#fee2e2; color:#dc2626; border:none; font-weight:700; font-size:14px; cursor:pointer; transition:.3s;">
+                                Batalkan Pesanan
+                            </button>
+                        </form>
                     </div>
                 @endif
             </div>

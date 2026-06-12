@@ -221,6 +221,7 @@ class OrderController extends Controller
     public function orders(Request $request)
     {
         $search = $request->query('search');
+        $status = $request->query('status');
 
         $query = Order::with('user')->latest();
 
@@ -232,6 +233,10 @@ class OrderController extends Controller
                       $uq->where('name', 'like', "%{$search}%");
                   });
             });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
         }
 
         $orders = $query->get();
@@ -353,5 +358,144 @@ class OrderController extends Controller
             ->firstOrFail();
 
         return view('orders.show', compact('order'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER - CANCEL ORDER
+    |--------------------------------------------------------------------------
+    */
+
+    public function cancel(Request $request, $id)
+    {
+        $order = Order::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $order->update(['status' => 'cancelled']);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Pesanan #' . $order->id . ' berhasil dibatalkan.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER - EDIT ORDER
+    |--------------------------------------------------------------------------
+    */
+
+    public function edit($id)
+    {
+        $order = Order::with('items.product')->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $allProducts = \App\Models\Product::orderBy('name')->get();
+
+        return view('orders.edit', compact('order', 'allProducts'));
+    }
+
+    public function updateUserOrder(Request $request, $id)
+    {
+        $order = Order::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $request->validate([
+            'name'    => 'required|string|max:255',
+            'address' => 'required|string',
+            'phone'   => 'required|string|max:20',
+            'items'   => 'required|array',
+            'items.*' => 'required|integer|min:0',
+        ]);
+
+        // Filter out items with 0 quantity
+        $itemsData = array_filter($request->input('items'), function($qty) {
+            return $qty > 0;
+        });
+
+        if (empty($itemsData)) {
+            return redirect()->back()->withErrors(['items' => 'Pesanan harus memiliki minimal 1 produk.'])->withInput();
+        }
+
+        // Validate stock first before modifying database
+        foreach ($itemsData as $productId => $qty) {
+            $product = \App\Models\Product::findOrFail($productId);
+            if ($product->stock < $qty) {
+                return redirect()->back()->withErrors(['items' => 'Stok produk "' . $product->name . '" tidak mencukupi. Tersedia: ' . $product->stock])->withInput();
+            }
+        }
+
+        // Delete existing items
+        $order->items()->delete();
+
+        $totalPrice = 0;
+        foreach ($itemsData as $productId => $qty) {
+            $product = \App\Models\Product::findOrFail($productId);
+
+            $order->items()->create([
+                'product_id' => $productId,
+                'quantity'   => $qty,
+                'price'      => $product->price,
+            ]);
+
+            $totalPrice += $product->price * $qty;
+        }
+
+        // Update order info
+        $order->update([
+            'name'        => $request->input('name'),
+            'address'     => $request->input('address'),
+            'phone'       => $request->input('phone'),
+            'total_price' => $totalPrice,
+        ]);
+
+        // Regenerate Midtrans Snap Token
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+        $isProduction = filter_var(env('MIDTRANS_IS_PRODUCTION', false), FILTER_VALIDATE_BOOLEAN);
+        $baseUrl = $isProduction 
+            ? 'https://app.midtrans.com/snap/v1/transactions' 
+            : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->withBasicAuth($serverKey, '')
+            ->post($baseUrl, [
+                'transaction_details' => [
+                    'order_id' => 'ORDER-' . $order->id . '-' . time(),
+                    'gross_amount' => (int) $totalPrice,
+                ],
+                'customer_details' => [
+                    'first_name' => $order->name,
+                    'phone' => $order->phone,
+                    'email' => Auth::user()->email ?? 'customer@greenhouse.com',
+                ],
+                'callbacks' => [
+                    'finish' => route('orders.mine'),
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                $order->update([
+                    'snap_token' => $result['token'],
+                    'redirect_url' => $result['redirect_url'],
+                ]);
+            } else {
+                \Log::error('Midtrans API Error during edit: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            \Log::error('Midtrans Exception during edit: ' . $e->getMessage());
+        }
+
+        return redirect()
+            ->route('orders.mine')
+            ->with('success', 'Pesanan #' . $order->id . ' berhasil diperbarui.');
     }
 }

@@ -29,3 +29,7 @@ MIDTRANS_SERVER_KEY=Mid-server-**********
 16. [X] ubah logic pada route 'admin/orders' jadi statusnya ("Pending", "Processing", "Ready to Ship", "Shipped") jadi setelah customer selesai membayar status otomatis berubah menjadi "Processing".
 17. [X] Pada route '/checkout' hilangkan opsi "Metode Pengiriman", "Metode Pembayaran". untuk metode pembayaran tidak perlu memilih lagi karena otomatis menggunakan midtrans.
 18. [X] Pada route '/admin/orders' pada status "Shipped" hilangkan logic untuk memasukkan "Nama Kurir" dan "Nomor Resi" dan pada route "/orders" hilangkan "Informasi Pengiriman" karena sudah tidak memakai Metode Pengiriman, dan juga Metode Pembayaran pada route 'orders/:id' pastikan sesuai dengan metode yang digunakan customer pada midtrans.
+19. [X] Pada route 'orders' tambahkan fitur untuk membatalkan pesanan dengan kondisi status pesanan masih "Pending" atau belum dibayar.
+20. [X] Pada route 'admin/orders' tambahkan filter pesanan dari statusnya.
+21. [X] Pada route 'admin/dashboard' ada statistik yang menampilkan Total Pelanggan bisakah itu nanti di klik dan menampilkan daftar pelanggan dan bisa melihat history pembelian dari pelanggan itu?
+22. [X] Pada route 'orders' tambahkan fitur untuk edit pesanana dengan kondisi status pesanan masih "Pending" atau belum dibayar. dan ratakan button dengan Detail Pesanan, Batalkan Pesanan.

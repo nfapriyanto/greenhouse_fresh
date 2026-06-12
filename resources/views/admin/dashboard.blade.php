@@ -737,7 +737,7 @@
 
         </div>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.customers.index') }}" class="stat-card" style="text-decoration: none; display: block; color: inherit; cursor: pointer; transition: .3s; border: 1px solid #eef2f7;">
 
             <div class="stat-title">
 
@@ -751,7 +751,7 @@
 
             </div>
 
-        </div>
+        </a>
 
         <div class="stat-card">
 

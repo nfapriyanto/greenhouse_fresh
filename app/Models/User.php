@@ -13,4 +13,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = ['name', 'email', 'password'];
 
     protected $hidden = ['password', 'remember_token'];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

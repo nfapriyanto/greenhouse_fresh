@@ -175,6 +175,18 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('id')
         ->name('orders.show');
 
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])
+        ->whereNumber('id')
+        ->name('orders.cancel');
+
+    Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])
+        ->whereNumber('id')
+        ->name('orders.edit');
+
+    Route::put('/orders/{id}', [OrderController::class, 'updateUserOrder'])
+        ->whereNumber('id')
+        ->name('orders.update_user');
+
     /*
     |--------------------------------------------------------------------------
     | PAYMENT
@@ -310,6 +322,24 @@ Route::prefix('admin')
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])
             ->whereNumber('order')
             ->name('orders.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | CUSTOMERS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('customers')
+            ->name('customers.')
+            ->group(function () {
+
+            Route::get('/', [AdminController::class, 'customers'])
+                ->name('index');
+
+            Route::get('/{id}', [AdminController::class, 'customerShow'])
+                ->whereNumber('id')
+                ->name('show');
+        });
 
         /*
         |--------------------------------------------------------------------------
