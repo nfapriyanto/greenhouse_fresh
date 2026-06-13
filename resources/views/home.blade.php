@@ -183,14 +183,23 @@
 
                 @csrf
 
-                <button
-                    type="submit"
-                    class="btn-cart"
-                >
-
-                    + Tambah Keranjang
-
-                </button>
+                @if($product->stock > 0)
+                    <button
+                        type="submit"
+                        class="btn-cart"
+                    >
+                        + Tambah Keranjang
+                    </button>
+                @else
+                    <button
+                        type="button"
+                        class="btn-cart"
+                        disabled
+                        style="background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none;"
+                    >
+                        Stok Habis
+                    </button>
+                @endif
 
             </form>
 
